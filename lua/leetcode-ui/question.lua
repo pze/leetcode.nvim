@@ -53,6 +53,10 @@ function Question:reset_lines()
     self:set_lines(new_lines)
 end
 
+function kebabToSnakeCase(str)
+    return string.gsub(str, "%-", "_")
+end
+
 ---@return string path, boolean existed
 function Question:path()
     local lang = utils.get_lang(self.lang)
@@ -67,7 +71,7 @@ function Question:path()
         return self.file:absolute(), true
     end
 
-    local fn = ("%s.%s%s.%s"):format(self.q.frontend_id, self.q.title_slug, alt, lang.ft)
+    local fn = ("p%s_%s%s.%s"):format(self.q.frontend_id, kebabToSnakeCase(self.q.title_slug), alt, lang.ft)
     self.file = config.storage.home:joinpath(fn)
     local existed = true
 
