@@ -1,18 +1,17 @@
+local leetcode = require("leetcode")
 local config = require("leetcode.config")
 
----@class lc.LeetCode
-local leetcode = {}
+local standalone = true
+local prev_cwd = nil
 
 ---@param on_vimenter boolean
----
----@return boolean
-function leetcode.should_skip(on_vimenter)
+leetcode.should_skip = function(on_vimenter)
     if on_vimenter then
         if vim.fn.argc() ~= 1 then
             return true
         end
 
-        local usr_arg, arg = config.user.arg, vim.fn.argv()[1]
+        local usr_arg, arg = vim.fn.argv()[1], config.user.arg
         if usr_arg ~= arg then
             return true
         end
@@ -27,9 +26,7 @@ function leetcode.should_skip(on_vimenter)
         for _, buf_id in pairs(vim.api.nvim_list_bufs()) do
             local bufinfo = vim.fn.getbufinfo(buf_id)[1]
             if bufinfo and (bufinfo.listed == 1 and #bufinfo.windows > 0) then
-                local log = require("leetcode.logger")
-                log.warn("Failed to initialize: `neovim` contains listed buffers")
-                return true
+                return false, true
             end
         end
     end
@@ -37,19 +34,14 @@ function leetcode.should_skip(on_vimenter)
     return false
 end
 
-function leetcode.setup_cmds()
-    require("leetcode.command").setup()
-end
-
 ---@param on_vimenter boolean
-function leetcode.start(on_vimenter)
-    if leetcode.should_skip(on_vimenter) then
+leetcode.start = function(on_vimenter)
+    local skip, buflisted = leetcode.should_skip(on_vimenter)
+    if skip then
         return false
     end
 
     config.setup()
-
-    vim.api.nvim_set_current_dir(config.storage.home:absolute())
 
     leetcode.setup_cmds()
 
@@ -57,8 +49,17 @@ function leetcode.start(on_vimenter)
     theme.setup()
 
     if not on_vimenter then
-        vim.cmd.enew()
+        if buflisted then
+            prev_cwd = vim.fn.getcwd()
+            vim.cmd.tabe()
+        else
+            vim.cmd.enew()
+        end
+
+        standalone = not buflisted
     end
+
+    vim.api.nvim_set_current_dir(config.storage.home:absolute())
 
     local Menu = require("leetcode-ui.renderer.menu")
     Menu():mount()
@@ -69,13 +70,12 @@ function leetcode.start(on_vimenter)
     return true
 end
 
-function leetcode.stop()
-    vim.cmd("qa!")
-end
+leetcode.stop = vim.schedule_wrap(function()
+    if standalone then
+        return vim.cmd("qa!")
+    end
 
----@param cfg? lc.UserConfig
-function leetcode.setup(cfg)
-    config.apply(cfg or {})
+    _Lc_state.menu:unmount()
 
     vim.api.nvim_create_user_command("Leet", require("leetcode.command").start_with_cmd, {
         bar = true,
@@ -83,15 +83,11 @@ function leetcode.setup(cfg)
         desc = "Open leetcode.nvim",
     })
 
-    local group_id = vim.api.nvim_create_augroup("leetcode_start", { clear = true })
-    vim.api.nvim_create_autocmd("VimEnter", {
-        group = group_id,
-        pattern = "*",
-        nested = true,
-        callback = function()
-            leetcode.start(true)
-        end,
-    })
-end
+    local utils = require("leetcode.utils")
+    utils.exec_hooks("leave")
 
-return leetcode
+    if prev_cwd then
+        vim.api.nvim_set_current_dir(prev_cwd)
+        prev_cwd = nil
+    end
+end)

@@ -93,6 +93,11 @@ To see full configuration types see [template.lua](./lua/leetcode/config/templat
         cache = vim.fn.stdpath("cache") .. "/leetcode",
     },
 
+    ---@type table<string, boolean>
+    plugins = {
+        non_standalone = false,
+    },
+
     ---@type boolean
     logging = true,
 
@@ -137,10 +142,13 @@ To see full configuration types see [template.lua](./lua/leetcode/config/templat
 
         ---@type fun(question: lc.ui.Question)[]
         ["question_enter"] = {},
+
+        ---@type fun()[]
+        ["leave"] = {},
     },
 
     keys = {
-        toggle = { "q", "<Esc>" }, ---@type string|string[]
+        toggle = { "q" }, ---@type string|string[]
         confirm = { "<CR>" }, ---@type string|string[]
 
         reset_testcases = "r", ---@type string
@@ -148,6 +156,9 @@ To see full configuration types see [template.lua](./lua/leetcode/config/templat
         focus_testcases = "H", ---@type string
         focus_result = "L", ---@type string
     },
+
+    ---@type lc.highlights
+    theme = {},
 
     ---@type boolean
     image_support = false,
@@ -226,6 +237,17 @@ storage = {
 },
 ```
 
+### plugins
+
+[plugins list](#-plugins)
+
+```lua
+---@type table<string, boolean>
+plugins = {
+    non_standalone = false,
+},
+```
+
 ### logging
 
 Whether to log [leetcode.nvim] status notifications
@@ -244,7 +266,7 @@ Inject code before or after your solution, injected code won't be submitted or r
 You can also pass `before = true` to inject default imports for the language.
 Supported languages are `python`, `python3`, `java`
 
-Access default imports via `require("leetcode.config.imports)`
+Access default imports via `require("leetcode.config.imports")`
 
 ```lua
 injector = { ---@type table<lc.lang, lc.inject>
@@ -272,6 +294,27 @@ hooks = {
 
     ---@type fun(question: lc.ui.Question)[]
     ["question_enter"] = {},
+
+    ---@type fun()[]
+    ["leave"] = {},
+},
+```
+
+### theme
+
+Override the [default theme](./lua/leetcode/theme/default.lua).
+
+Each value is the same type as val parameter in `:help nvim_set_hl`
+
+```lua
+---@type lc.highlights
+theme = {
+    ["alt"] = {
+        bg = "#FFFFFF",
+    },
+    ["normal"] = {
+        fg = "#EA4AAA",
+    },
 },
 ```
 
@@ -293,6 +336,8 @@ image_support = false,
 ### `Leet` opens menu dashboard
 
 - `menu` same as `Leet`
+
+- `exit` close [leetcode.nvim]
 
 - `console` opens console pop-up for currently opened question
 
@@ -418,6 +463,21 @@ https://github.com/kawre/leetcode.nvim/assets/69250723/b7be8b95-5e2c-4153-8845-4
       cmd = "Leet",
   }
   ```
+
+## 🧩 Plugins
+
+### Non-Standalone mode
+
+To run [leetcode.nvim] in a non-standalone mode (i.e. not with argument or an empty Neovim session),
+enable the `non_standalone` plugin in your config:
+
+```lua
+plugins = {
+    non_standalone = true,
+}
+```
+
+You can then exit [leetcode.nvim] using `:Leet exit` command
 
 ## 🙌 Credits
 

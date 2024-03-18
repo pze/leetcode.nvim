@@ -1,11 +1,10 @@
 local template = require("leetcode.config.template")
 local P = require("plenary.path")
 
----@type lc.ui.Question[]
-_Lc_questions = {}
-
----@type lc.ui.Menu
-_Lc_menu = {} ---@diagnostic disable-line
+_Lc_state = {
+    menu = nil, ---@type lc.ui.Menu
+    questions = {}, ---@type lc.ui.Question[]
+}
 
 local lazy_plugs = {}
 
@@ -21,6 +20,7 @@ local config = {
     lang = "cpp",
     version = "1.0.1",
     storage = {}, ---@type table<string, Path>
+    theme = {}, ---@type lc.highlights
 
     translator = false,
 
@@ -74,14 +74,18 @@ function config.validate()
 
     assert(vim.fn.has("nvim-0.9.0") == 1, "Neovim >= 0.9.0 required")
 
-    if not utils.get_lang(config.lang) then --
+    if not utils.get_lang(config.lang) then
         ---@type lc.lang[]
-        local lang_slugs = vim.tbl_map(function(lang) return lang.slug end, config.langs)
+        local lang_slugs = vim.tbl_map(function(lang)
+            return lang.slug
+        end, config.langs)
 
         local matches = {}
         for _, slug in ipairs(lang_slugs) do
             local percent = slug:match(config.lang) or config.lang:match(slug)
-            if percent then table.insert(matches, slug) end
+            if percent then
+                table.insert(matches, slug)
+            end
         end
 
         if not vim.tbl_isempty(matches) then
@@ -96,10 +100,14 @@ end
 function config.load_plugins()
     local plugins = {}
 
-    if config.user.cn.enabled then table.insert(plugins, "cn") end
+    if config.user.cn.enabled then
+        table.insert(plugins, "cn")
+    end
 
     for plugin, enabled in pairs(config.user.plugins) do
-        if enabled then table.insert(plugins, plugin) end
+        if enabled then
+            table.insert(plugins, plugin)
+        end
     end
 
     for _, plugin in ipairs(plugins) do

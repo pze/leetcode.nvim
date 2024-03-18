@@ -23,6 +23,7 @@
 ---@alias lc.hook
 ---| "enter"
 ---| "question_enter"
+---| "leave"
 
 ---@alias lc.size
 ---| string
@@ -57,7 +58,10 @@ local M = {
         cache = vim.fn.stdpath("cache") .. "/leetcode",
     },
 
-    plugins = {},
+    ---@type table<string, boolean>
+    plugins = {
+        non_standalone = false,
+    },
 
     ---@type boolean
     logging = true,
@@ -103,10 +107,13 @@ local M = {
 
         ---@type fun(question: lc.ui.Question)[]
         ["question_enter"] = {},
+
+        ---@type fun()[]
+        ["leave"] = {},
     },
 
     keys = {
-        toggle = { "q", "<Esc>" }, ---@type string|string[]
+        toggle = { "q" }, ---@type string|string[]
         confirm = { "<CR>" }, ---@type string|string[]
 
         reset_testcases = "r", ---@type string
@@ -115,8 +122,11 @@ local M = {
         focus_result = "L", ---@type string
     },
 
+    ---@type lc.highlights
+    theme = {},
+
     ---@type boolean
-    image_support = false, -- setting this to `true` will disable question description wrap
+    image_support = false,
 }
 
 return M

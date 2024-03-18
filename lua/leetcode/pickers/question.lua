@@ -38,7 +38,9 @@ local function display_user_status(question)
         return config.auth.is_premium and config.icons.hl.unlock or config.icons.hl.lock
     end
 
-    if question.status == vim.NIL then return { "" } end
+    if question.status == vim.NIL then
+        return { "" }
+    end
     return config.icons.hl.status[question.status] or { "" }
 end
 
@@ -94,7 +96,9 @@ local theme = require("telescope.themes").get_dropdown({
 ---
 ---@return lc.cache.Question[]
 local function filter_questions(questions, opts)
-    if vim.tbl_isempty(opts or {}) then return questions end
+    if vim.tbl_isempty(opts or {}) then
+        return questions
+    end
 
     ---@param q lc.cache.Question
     return vim.tbl_filter(function(q)
@@ -104,7 +108,7 @@ local function filter_questions(questions, opts)
         end
 
         local status_flag = true
-        if opts.status and not vim.tbl_contains(opts.status, q.status) then --
+        if opts.status and not vim.tbl_contains(opts.status, q.status) then
             status_flag = false
         end
 
@@ -124,9 +128,11 @@ return {
                 }),
                 sorter = conf.generic_sorter(theme),
                 attach_mappings = function(prompt_bufnr, map)
-                    local function mount_question(reset)
+                    actions.select_default:replace(function()
                         local selection = action_state.get_selected_entry()
-                        if not selection then return end
+                        if not selection then
+                            return
+                        end
 
                         local q = selection.value
                         if q.paid_only and not config.auth.is_premium then
@@ -134,11 +140,8 @@ return {
                         end
 
                         actions.close(prompt_bufnr)
-                        Question(q, reset):mount()
-                    end
-
-                    actions.select_default:replace(function() mount_question() end)
-                    map({ "n", "i" }, "<C-Enter>", function() mount_question(true) end)
+                        Question(q):mount()
+                    end)
 
                     return true
                 end,

@@ -95,6 +95,11 @@ https://github.com/kawre/leetcode.nvim/assets/69250723/aee6584c-e099-4409-b114-1
         cache = vim.fn.stdpath("cache") .. "/leetcode",
     },
 
+    ---@type table<string, boolean>
+    plugins = {
+        non_standalone = false,
+    },
+
     ---@type boolean
     logging = true,
 
@@ -139,10 +144,13 @@ https://github.com/kawre/leetcode.nvim/assets/69250723/aee6584c-e099-4409-b114-1
 
         ---@type fun(question: lc.ui.Question)[]
         ["question_enter"] = {},
+
+        ---@type fun()[]
+        ["leave"] = {},
     },
 
     keys = {
-        toggle = { "q", "<Esc>" }, ---@type string|string[]
+        toggle = { "q" }, ---@type string|string[]
         confirm = { "<CR>" }, ---@type string|string[]
 
         reset_testcases = "r", ---@type string
@@ -150,6 +158,9 @@ https://github.com/kawre/leetcode.nvim/assets/69250723/aee6584c-e099-4409-b114-1
         focus_testcases = "H", ---@type string
         focus_result = "L", ---@type string
     },
+
+    ---@type lc.highlights
+    theme = {},
 
     ---@type boolean
     image_support = false,
@@ -228,6 +239,17 @@ storage = {
 },
 ```
 
+### plugins
+
+[插件列表](#-plugins)
+
+```lua
+---@type table<string, boolean>
+plugins = {
+    non_standalone = false,
+},
+```
+
 ### logging
 
 是否记录 [leetcode.nvim] 状态通知
@@ -246,7 +268,7 @@ logging = true
 您还可以传递 `before = true` 以注入语言的默认导入。
 支持的语言为 `python`、`python3`、`java`
 
-通过 `require("leetcode.config.imports)` 访问默认导入
+通过 `require("leetcode.config.imports")` 访问默认导入
 
 ```lua
 injector = { ---@type table<lc.lang, lc.inject>
@@ -271,6 +293,27 @@ hooks = {
 
     ---@type fun(question: lc.ui.Question)[]
     ["question_enter"] = {},
+
+    ---@type fun()[]
+    ["leave"] = {},
+},
+```
+
+### theme
+
+覆盖[默认主题](./lua/leetcode/theme/default.lua)
+
+每个值都与 `:help nvim_set_hl` 中的val参数相同类型
+
+```lua
+---@type lc.highlights
+theme = {
+    ["alt"] = {
+        bg = "#FFFFFF",
+    },
+    ["normal"] = {
+        fg = "#EA4AAA",
+    },
 },
 ```
 
@@ -292,6 +335,8 @@ image_support = false, -- 将此设置为 `true` 将禁用问题描述的换行
 ### `Leet` 打开菜单仪表板
 
 - `menu` 与 `Leet` 相同
+
+- `exit` 关闭 [leetcode.nvim]
 
 - `console` 打开当前打开问题的控制台弹出窗口
 
@@ -416,6 +461,21 @@ https://github.com/kawre/leetcode.nvim/assets/69250723/b7be8b95-5e2c-4153-8845-4
       cmd = "Leet",
   }
   ```
+
+## 🧩 Plugins
+
+### Non-Standalone mode
+
+要在非独立模式下运行 [leetcode.nvim]（即不带参数或在空的 Neovim 会话中运行），
+请在您的配置中启用 `non_standalone` 插件：
+
+```lua
+plugins = {
+    non_standalone = true,
+}
+```
+
+你可以使用 `:Leet exit` 命令退出 [leetcode.nvim]
 
 ## 🙌 鸣谢
 

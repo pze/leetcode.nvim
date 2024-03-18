@@ -8,8 +8,12 @@ local function hl(name)
     local highlight = vim.api.nvim_get_hl(0, { name = name, link = false })
     setmetatable(highlight, {
         __index = function(self, key)
-            if key == "bg" then return self.background end
-            if key == "fg" then return self.foreground end
+            if key == "bg" then
+                return self.background
+            end
+            if key == "fg" then
+                return self.foreground
+            end
 
             return nil
         end,
@@ -18,7 +22,8 @@ local function hl(name)
     return highlight
 end
 
----@alias lc.highlights table<string, table>
+---@alias lc.highlights table<string, vim.api.keyset.highlight>
+
 ---@return lc.highlights
 M.get = function()
     return {
