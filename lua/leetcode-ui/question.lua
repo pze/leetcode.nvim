@@ -8,6 +8,9 @@ local utils = require("leetcode.utils")
 local config = require("leetcode.config")
 local log = require("leetcode.logger")
 
+local leet_start = "@lc code=start"
+local leet_end = "@lc code=end"
+
 ---@class lc.ui.Question
 ---@field file Path
 ---@field q lc.question_res
@@ -75,7 +78,12 @@ function Question:path()
         return self.file:absolute(), true
     end
 
-    local fn = ("p%s_%s%s.%s"):format(self.q.frontend_id, kebabToSnakeCase(self.q.title_slug), alt, lang.ft)
+    local fn = ("p%s_%s%s.%s"):format(
+        self.q.frontend_id,
+        kebabToSnakeCase(self.q.title_slug),
+        alt,
+        lang.ft
+    )
     self.file = config.storage.home:joinpath(fn)
     local existed = self.file:exists()
 
@@ -140,9 +148,9 @@ function Question:injector(code)
     local lang = utils.get_lang(self.lang)
 
     local parts = {
-        ("%s @leet start"):format(lang.comment),
+        ("%s %s"):format(lang.comment, leet_start),
         code,
-        ("%s @leet end"):format(lang.comment),
+        ("%s %s"):format(lang.comment, leet_end),
     }
 
     local before = self:inject(true)
@@ -246,9 +254,9 @@ function Question:range(inclusive)
     local start_i, end_i
 
     for i, line in ipairs(lines) do
-        if line:match("@leet start") then
+        if line:match(leet_start) then
             start_i = i + (inclusive and 0 or 1)
-        elseif line:match("@leet end") then
+        elseif line:match(leet_end) then
             end_i = i - (inclusive and 0 or 1)
         end
     end
